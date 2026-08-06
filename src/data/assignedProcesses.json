@@ -1,0 +1,12 @@
+[
+    {
+        "newborn": { "id": 1, "name": "Thomas" },
+        "process": { "name": "BCG Vaccine" },
+        "status": "PENDING"
+    },
+    {
+        "newborn": { "id": 1, "name": "Thomas" },
+        "process": { "name": "Hearing Test" },
+        "status": "COMPLETED"
+    }
+]

@@ -1,0 +1,23 @@
+{
+    "id": 1,
+    "name": "Thomas",
+    "birthDateTime": "2026-08-05T14:30",
+    "weight": 3.2,
+    "gestationalAge": 39,
+    "gender": "MALE",
+    "admittedToNICU": false,
+    "contacts": [
+        {
+            "fullName": "Jane Doe",
+            "email": "janed@email.com",
+            "phone": "+56912345678",
+            "relationship": "MOTHER"
+        },
+        {
+            "fullName": "Jhon Doe",
+            "email": "jhond@email.com",
+            "phone": "+56987654321",
+            "relationship": "FATHER"
+        }
+    ]
+}
