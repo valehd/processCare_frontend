@@ -2,32 +2,111 @@
 
 ## Overview
 
-**ProcessCare** is a TypeScript frontend application developed to support the management of neonatal healthcare processes in a Neonatal Intensive Care Unit (NICU).
+**ProcessCare** is a TypeScript frontend application designed to support the management of neonatal healthcare processes in a Neonatal Intensive Care Unit (NICU).
 
-The application allows healthcare staff to register newborns, display patient information, assign clinical procedures, and update the status of each healthcare process through an intuitive and type-safe interface.
+The application allows healthcare staff to register newborn patients, visualize clinical information, manage parent or guardian contacts, assign healthcare processes, and update the status of each assigned process.
 
-This project was developed for **Hito 2**, focusing on **TypeScript best practices**, **secure DOM manipulation**, and **asynchronous programming**.
+This project was developed for **Hito 2**, focusing on:
+
+- TypeScript best practices
+- Strong typing and data modeling
+- Secure DOM manipulation
+- Form validation
+- Asynchronous programming
+- Modular application architecture
 
 ---
 
 # Features
 
-* Register a newborn using a validated form.
-* Display complete newborn information.
-* Manage parent or guardian contact information.
-* View available healthcare processes.
-* Assign healthcare processes to the newborn.
-* Complete or cancel assigned processes.
-* Display loading and error states during data retrieval.
+- Register newborn patients through a validated form.
+- Display complete newborn clinical information.
+- Manage parent or guardian contact information.
+- Validate newborn registration data.
+- View available healthcare processes.
+- Assign healthcare processes to newborn patients.
+- Update assigned process status:
+  - Pending
+  - Completed
+  - Cancelled
+- Display loading states during asynchronous operations.
+- Display error messages when operations fail.
 
 ---
 
 # Technologies
 
-* TypeScript
-* HTML5
-* CSS3
-* Vite
+- TypeScript
+- HTML5
+- CSS3
+- Vite
+
+---
+
+# Application Architecture
+
+The project follows a modular architecture based on separation of responsibilities.
+
+The application is divided into different layers:
+
+---
+
+## Components
+
+Responsible for generating and managing reusable interface sections.
+
+Implemented components:
+
+- Header
+- Patient Information section
+- Newborn registration form
+- Healthcare process cards
+
+Components are responsible only for UI generation and interaction binding.
+
+---
+
+## Services
+
+Responsible for asynchronous data operations and communication with application data sources.
+
+Implemented services:
+
+- Load newborn information
+- Load healthcare processes
+- Load assigned processes
+- Save newborn registration data
+
+The service layer separates data handling from the user interface.
+
+---
+
+## Models
+
+Contains the TypeScript definitions of the business domain.
+
+### Interfaces
+
+- Newborn
+- Contact
+- HealthcareProcess
+- AssignedProcess
+
+### Enumerations
+
+- Gender
+- Relationship
+- ProcessStatus
+
+These models guarantee strong typing throughout the application.
+
+---
+
+## Validation Layer
+
+Business validation rules are separated from form handling logic.
+
+The validation layer verifies that newborn registration data meets the required rules before saving information.
 
 ---
 
@@ -40,11 +119,16 @@ processcare-frontend/
 │   └── logo.png
 │
 ├── src/
+│   │
 │   ├── assets/
 │   │   └── styles.css
 │   │
 │   ├── components/
+│   │   ├── Header.ts
+│   │   ├── PatientInfo.ts
 │   │   ├── NewbornForm.ts
+│   │   ├── NewbornFormFields.ts
+│   │   ├── NewbornValidation.ts
 │   │   └── ProcessCard.ts
 │   │
 │   ├── data/
@@ -57,7 +141,8 @@ processcare-frontend/
 │   │   └── process.ts
 │   │
 │   ├── services/
-│   │   └── processService.ts
+│   │   ├── processService.ts
+│   │   └── newbornService.ts
 │   │
 │   └── main.ts
 │
@@ -74,99 +159,162 @@ processcare-frontend/
 
 ## 1. Data Modeling with TypeScript
 
-The application models all business entities using **strict TypeScript interfaces** and **enumerations**, ensuring strong typing throughout the project.
+The application uses TypeScript interfaces and enums to represent the neonatal healthcare domain.
 
-### Interfaces
+### Implemented Interfaces
 
-* Newborn
-* Contact
-* HealthcareProcess
-* AssignedProcess
+```text
+Newborn
+Contact
+HealthcareProcess
+AssignedProcess
+```
 
-### Enumerations
+### Implemented Enums
 
-* ProcessStatus
-* Gender
-* Relationship
+```text
+Gender
+Relationship
+ProcessStatus
+```
 
 ### Benefits
 
-* No use of `any`
-* Compile-time type checking
-* Strongly typed business entities
-* Improved maintainability
+The use of TypeScript models provides:
+
+- Strong compile-time validation.
+- Safer data manipulation.
+- Improved maintainability.
+- Better code readability.
+- Avoidance of the `any` type.
 
 ---
 
-## 2. Secure DOM Manipulation and Form Handling
+# 2. Secure DOM Manipulation and Form Handling
 
-The application safely interacts with the DOM using TypeScript type guards.
+The application interacts with the DOM using TypeScript type guards to ensure safe element handling.
 
-### DOM Safety
+## DOM Safety
 
-* HTMLFormElement validation
-* HTMLInputElement validation
-* HTMLSelectElement validation
-* HTMLParagraphElement validation
+Implemented checks for:
 
-### Form Handling
+```text
+HTMLFormElement
+HTMLInputElement
+HTMLSelectElement
+HTMLButtonElement
+HTMLParagraphElement
+```
+
+## Example Practices
+
+- Validate DOM elements before usage.
+- Avoid unsafe element casting.
+- Ensure correct element types before accessing values.
+
+---
+
+# Newborn Registration Form
 
 The newborn registration form includes:
 
-* `preventDefault()` to prevent page reloads
-* Safe extraction of form values
-* Typed DOM access
-* Client-side validation
-* User-friendly error messages
+- Patient information.
+- Birth date and time.
+- Weight.
+- Gestational age.
+- Gender.
+- NICU admission status.
+- Parent or guardian contact information.
 
-### Implemented Validations
+The form uses:
 
-* Positive newborn ID
-* Name is required
-* Name cannot contain only numbers
-* Birth date is required
-* Weight must be between 0.5 and 8 kg
-* Gestational age must be between 22 and 45 weeks
-* Contact name is required
-* Email format validation
-* Phone number validation
+- `preventDefault()` to avoid page reload.
+- Typed DOM access.
+- Validation before saving.
+- Error feedback messages.
+- Asynchronous saving process.
 
 ---
 
-## 3. Asynchronous Architecture
+# Implemented Validations
 
-Application data is loaded asynchronously to simulate communication with external services.
+The application validates:
 
-### Techniques Used
+- ID must be greater than zero.
+- Name is required.
+- Name cannot contain only numbers.
+- Birth date is required.
+- Birth date cannot be in the future.
+- Weight must be between 0.5 and 8 kg.
+- Gestational age must be between 22 and 45 weeks.
+- Contact name is required.
+- Email format validation.
+- Phone number validation.
 
-* async / await
-* Promise.all()
-* try / catch
+These validations represent basic business rules for neonatal registration.
 
-### Resources Loaded
+---
 
-* newborn.json
-* healthcareProcesses.json
-* assignedProcesses.json
+# 3. Asynchronous Architecture
 
-### User Experience
+The application uses asynchronous programming to simulate communication with external services.
 
-The application displays:
+## Implemented Techniques
 
-* Loading state while retrieving data
-* Error message if loading fails
-* Automatically rendered interface after successful loading
+- `async / await`
+- `Promise.all()`
+- `try / catch`
+
+---
+
+## Data Operations
+
+The application performs asynchronous operations for:
+
+- Loading newborn information.
+- Loading healthcare processes.
+- Loading assigned processes.
+- Saving new newborn registrations.
+
+---
+
+## User Experience
+
+The application provides:
+
+- Loading messages while retrieving information.
+- Error messages when operations fail.
+- Automatic UI refresh after successful operations.
 
 ---
 
 # Application Workflow
 
-1. Application starts.
+1. The application starts.
 2. Initial data is loaded asynchronously.
 3. Newborn information is displayed.
-4. Available healthcare processes are shown.
-5. Users can assign, complete, or cancel healthcare processes.
-6. A validated form allows registration of a newborn.
+4. Healthcare processes are displayed.
+5. Users can assign processes to the newborn.
+6. Users can complete or cancel assigned processes.
+7. Newborn registration can be performed through the validated form.
+8. Data is updated after successful operations.
+
+---
+
+# Code Quality Practices
+
+The project applies the following practices:
+
+- Separation of concerns.
+- Modular component design.
+- Reusable functions.
+- Clear responsibility between layers.
+- Strong TypeScript typing.
+- No usage of `any`.
+- Safe DOM manipulation.
+- Validation separated from UI logic.
+- Error handling with `try/catch`.
+- Clean asynchronous flow.
 
 ---
 
@@ -174,17 +322,17 @@ The application displays:
 
 This project demonstrates practical application of:
 
-* TypeScript Interfaces
-* TypeScript Enums
-* Strict Typing
-* DOM Type Guards
-* Event Handling
-* Form Validation
-* Async/Await
-* Promise.all()
-* Error Handling with try/catch
-* Modular Application Design
-* Separation of Concerns
+- TypeScript Interfaces.
+- TypeScript Enums.
+- Strict typing.
+- DOM type guards.
+- Event handling.
+- Form processing.
+- Business validation rules.
+- Async/Await programming.
+- Promise-based operations.
+- Error handling.
+- Modular frontend architecture.
 
 ---
 
@@ -214,7 +362,7 @@ Start the development server:
 npm run dev
 ```
 
-Open the local URL displayed in the terminal.
+Open the local URL provided by Vite.
 
 ---
 
