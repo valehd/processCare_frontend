@@ -1,112 +1,425 @@
 # ProcessCare Frontend
 
-## Overview
+## Neonatal Healthcare Process Management System
 
-**ProcessCare** is a TypeScript frontend application designed to support the management of neonatal healthcare processes in a Neonatal Intensive Care Unit (NICU).
+ProcessCare Frontend is a TypeScript-based web application for managing neonatal healthcare processes in a Neonatal Intensive Care Unit (NICU).
 
-The application allows healthcare staff to register newborn patients, visualize clinical information, manage parent or guardian contacts, assign healthcare processes, and update the status of each assigned process.
+The frontend provides a user-friendly interface for healthcare staff to visualize newborn information, manage parent or guardian contacts, assign healthcare processes, and update the status of assigned processes.
 
-This project was developed for **Hito 2**, focusing on:
-
-- TypeScript best practices
-- Strong typing and data modeling
-- Secure DOM manipulation
-- Form validation
-- Asynchronous programming
-- Modular application architecture
+For **Milestone 4 (Hito 4)**, the frontend is integrated with the ProcessCare backend through a REST API, replacing the previous local/mock data approach with real backend communication.
 
 ---
 
 # Features
 
-- Register newborn patients through a validated form.
-- Display complete newborn clinical information.
-- Manage parent or guardian contact information.
-- Validate newborn registration data.
-- View available healthcare processes.
-- Assign healthcare processes to newborn patients.
-- Update assigned process status:
-  - Pending
-  - Completed
-  - Cancelled
-- Display loading states during asynchronous operations.
-- Display error messages when operations fail.
+* View newborn clinical information.
+* Display parent or guardian contact information.
+* View healthcare processes assigned to a newborn.
+* Assign new healthcare processes.
+* Complete assigned healthcare processes.
+* Cancel assigned healthcare processes.
+* Display the current status of each process.
+* Handle API loading states.
+* Display error messages when API operations fail.
+* Refresh process information after successful operations.
+* Communicate asynchronously with the ProcessCare backend.
 
 ---
 
-# Technologies
+# Technology Stack
 
-- TypeScript
-- HTML5
-- CSS3
-- Vite
-
----
-
-# Application Architecture
-
-The project follows a modular architecture based on separation of responsibilities.
-
-The application is divided into different layers:
+| Technology          | Purpose                                |
+| ------------------- | -------------------------------------- |
+| TypeScript          | Strongly typed application development |
+| Vite                | Frontend development and build tool    |
+| HTML5               | Application structure                  |
+| CSS3                | Application styling                    |
+| REST API            | Communication with the backend         |
+| Fetch API           | HTTP requests                          |
+| JavaScript Promises | Asynchronous operations                |
 
 ---
 
-## Components
+# Architecture
 
-Responsible for generating and managing reusable interface sections.
+The frontend follows a modular architecture based on separation of responsibilities.
 
-Implemented components:
+```text
+src/
+│
+├── components/
+│   ├── Header.ts
+│   ├── PatientInfo.ts
+│   ├── ProcessCard.ts
+│   └── ...
+│
+├── models/
+│   ├── index.ts
+│   └── process.ts
+│
+├── services/
+│   ├── newbornService.ts
+│   └── processService.ts
+│
+├── assets/
+│   └── styles.css
+│
+└── main.ts
+```
 
-- Header
-- Patient Information section
-- Newborn registration form
-- Healthcare process cards
+### Components
 
-Components are responsible only for UI generation and interaction binding.
+Components are responsible for generating and managing the user interface.
+
+Examples include:
+
+* Header
+* Patient information
+* Process cards
+* Process status controls
+
+Components focus on presentation and user interaction.
+
+### Services
+
+The service layer is responsible for communication with the ProcessCare backend API.
+
+Services handle operations such as:
+
+* Retrieving newborn information.
+* Retrieving assigned processes.
+* Assigning processes.
+* Completing processes.
+* Cancelling processes.
+
+This separation keeps API communication independent from UI logic.
+
+### Models
+
+TypeScript interfaces and enums represent the application domain.
+
+Main models include:
+
+* `Newborn`
+* `ParentContact`
+* `HealthcareProcess`
+* `AssignedProcess`
+
+Main enums include:
+
+* `Gender`
+* `Relationship`
+* `ProcessStatus`
+
+Strong typing is used throughout the application and the project avoids the use of `any`.
 
 ---
 
-## Services
+# Backend Integration
 
-Responsible for asynchronous data operations and communication with application data sources.
+The frontend communicates with the ProcessCare backend through REST endpoints.
 
-Implemented services:
+The backend is implemented using:
 
-- Load newborn information
-- Load healthcare processes
-- Load assigned processes
-- Save newborn registration data
+* Java 21
+* Spring Boot
+* Spring Web
+* Spring Data JPA
+* PostgreSQL
+* Docker
 
-The service layer separates data handling from the user interface.
+The frontend and backend are maintained as separate projects/repositories.
+
+```text
+ProcessCare
+│
+├── processCare_Hito4
+│   └── Spring Boot Backend
+│
+└── processcare-frontend
+    └── TypeScript Frontend
+```
+
+The frontend development server runs on:
+
+```text
+http://localhost:5173
+```
+
+The backend API runs on:
+
+```text
+http://localhost:8080
+```
 
 ---
 
-## Models
+# REST API
 
-Contains the TypeScript definitions of the business domain.
+The frontend consumes the ProcessCare REST API under:
 
-### Interfaces
+```text
+/api/v1/newborns
+```
 
-- Newborn
-- Contact
-- HealthcareProcess
-- AssignedProcess
+## Get Newborn
 
-### Enumerations
+```http
+GET /api/v1/newborns/{newbornId}
+```
 
-- Gender
-- Relationship
-- ProcessStatus
+Returns the clinical information and contact information of a newborn.
 
-These models guarantee strong typing throughout the application.
+Example:
+
+```json
+{
+  "id": 1,
+  "name": "Newborn 1",
+  "birthDateTime": "2026-08-20T10:30:00",
+  "weight": 2.85,
+  "gestationalAge": 36,
+  "gender": "FEMALE",
+  "admittedToNICU": true,
+  "contacts": [
+    {
+      "fullName": "Mother of Newborn 1",
+      "email": "mother@example.com",
+      "phone": "+353871234567",
+      "relationship": "MOTHER"
+    }
+  ]
+}
+```
 
 ---
 
-## Validation Layer
+## Get Assigned Processes
 
-Business validation rules are separated from form handling logic.
+```http
+GET /api/v1/newborns/{newbornId}/processes
+```
 
-The validation layer verifies that newborn registration data meets the required rules before saving information.
+Returns all healthcare processes assigned to the newborn.
+
+Example:
+
+```json
+[
+  {
+    "newbornId": 1,
+    "newbornName": "Newborn 1",
+    "processName": "Eye Examination",
+    "status": "PENDING"
+  },
+  {
+    "newbornId": 1,
+    "newbornName": "Newborn 1",
+    "processName": "Hearing Test",
+    "status": "COMPLETED"
+  }
+]
+```
+
+---
+
+## Assign Process
+
+```http
+POST /api/v1/newborns/{newbornId}/processes
+```
+
+Assigns a healthcare process to the newborn.
+
+Example request:
+
+```json
+{
+  "processName": "Neonatal Screening"
+}
+```
+
+The newly assigned process starts with:
+
+```text
+PENDING
+```
+
+---
+
+## Complete Process
+
+The frontend provides an action to complete a pending healthcare process.
+
+The operation is sent to the backend API, which applies the corresponding business rule and changes the process status to:
+
+```text
+COMPLETED
+```
+
+---
+
+## Cancel Process
+
+The frontend provides an action to cancel a pending healthcare process.
+
+The operation is sent to the backend API, which changes the process status to:
+
+```text
+CANCELLED
+```
+
+The resulting status can then be verified through:
+
+```http
+GET /api/v1/newborns/{newbornId}/processes
+```
+
+---
+
+# Process Status
+
+Healthcare processes use the following statuses:
+
+```text
+PENDING
+COMPLETED
+CANCELLED
+```
+
+The frontend displays the current status returned by the backend.
+
+The main state flow is:
+
+```text
+        ┌──────────────┐
+        │    PENDING   │
+        └──────┬───────┘
+               │
+       ┌───────┴────────┐
+       │                │
+       ▼                ▼
+┌─────────────┐  ┌─────────────┐
+│  COMPLETED  │  │  CANCELLED  │
+└─────────────┘  └─────────────┘
+```
+
+The backend is responsible for enforcing the business rules associated with these state transitions.
+
+---
+
+# Asynchronous Programming
+
+The frontend uses asynchronous programming to communicate with the backend.
+
+Implemented techniques include:
+
+* `async / await`
+* `Promise`
+* `try / catch`
+* Fetch API
+* Asynchronous UI updates
+
+Example application flow:
+
+```text
+User Action
+    │
+    ▼
+Frontend Component
+    │
+    ▼
+Service Layer
+    │
+    ▼
+REST API
+    │
+    ▼
+Spring Boot Backend
+    │
+    ▼
+PostgreSQL
+    │
+    ▼
+API Response
+    │
+    ▼
+Frontend UI Update
+```
+
+---
+
+# Error Handling
+
+The frontend handles errors returned by the backend API and provides feedback to the user.
+
+Examples include:
+
+* Newborn not found.
+* Invalid process name.
+* Process already assigned.
+* Invalid process state.
+* Server or network errors.
+
+The backend uses structured error responses containing information such as:
+
+```json
+{
+  "message": "Process is already assigned",
+  "code": "BUSINESS_RULE_VIOLATION",
+  "timestamp": "2026-08-28T08:33:37"
+}
+```
+
+The frontend uses this information to display meaningful error messages.
+
+---
+
+# Loading States
+
+The application provides visual feedback while asynchronous operations are being executed.
+
+Loading states are used when:
+
+* Retrieving newborn information.
+* Retrieving assigned processes.
+* Assigning a process.
+* Completing a process.
+* Cancelling a process.
+
+After a successful operation, the relevant information is refreshed from the backend.
+
+---
+
+# TypeScript Practices
+
+The project uses TypeScript to provide strong typing throughout the application.
+
+The implementation focuses on:
+
+* Interfaces.
+* Enums.
+* Explicit types.
+* Type-safe function parameters.
+* Type-safe API responses.
+* DOM type checking.
+* Avoidance of `any`.
+
+The project has been checked to ensure that there are no explicit usages of the `any` type in the `src` directory.
+
+---
+
+# CORS
+
+The backend provides CORS configuration to allow communication with the Vite development server.
+
+The development frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+The backend allows requests from this origin for the API endpoints.
 
 ---
 
@@ -116,7 +429,7 @@ The validation layer verifies that newborn registration data meets the required 
 processcare-frontend/
 │
 ├── public/
-│   └── logo.png
+│   └── ...
 │
 ├── src/
 │   │
@@ -126,23 +439,16 @@ processcare-frontend/
 │   ├── components/
 │   │   ├── Header.ts
 │   │   ├── PatientInfo.ts
-│   │   ├── NewbornForm.ts
-│   │   ├── NewbornFormFields.ts
-│   │   ├── NewbornValidation.ts
-│   │   └── ProcessCard.ts
-│   │
-│   ├── data/
-│   │   ├── newborn.json
-│   │   ├── healthcareProcesses.json
-│   │   └── assignedProcesses.json
+│   │   ├── ProcessCard.ts
+│   │   └── ...
 │   │
 │   ├── models/
 │   │   ├── index.ts
 │   │   └── process.ts
 │   │
 │   ├── services/
-│   │   ├── processService.ts
-│   │   └── newbornService.ts
+│   │   ├── newbornService.ts
+│   │   └── processService.ts
 │   │
 │   └── main.ts
 │
@@ -155,230 +461,150 @@ processcare-frontend/
 
 ---
 
-# Hito 2 Requirements
+# Running the Project
 
-## 1. Data Modeling with TypeScript
+## Requirements
 
-The application uses TypeScript interfaces and enums to represent the neonatal healthcare domain.
-
-### Implemented Interfaces
-
-```text
-Newborn
-Contact
-HealthcareProcess
-AssignedProcess
-```
-
-### Implemented Enums
-
-```text
-Gender
-Relationship
-ProcessStatus
-```
-
-### Benefits
-
-The use of TypeScript models provides:
-
-- Strong compile-time validation.
-- Safer data manipulation.
-- Improved maintainability.
-- Better code readability.
-- Avoidance of the `any` type.
+* Node.js
+* npm
+* ProcessCare Backend
+* PostgreSQL through Docker
 
 ---
 
-# 2. Secure DOM Manipulation and Form Handling
-
-The application interacts with the DOM using TypeScript type guards to ensure safe element handling.
-
-## DOM Safety
-
-Implemented checks for:
-
-```text
-HTMLFormElement
-HTMLInputElement
-HTMLSelectElement
-HTMLButtonElement
-HTMLParagraphElement
-```
-
-## Example Practices
-
-- Validate DOM elements before usage.
-- Avoid unsafe element casting.
-- Ensure correct element types before accessing values.
-
----
-
-# Newborn Registration Form
-
-The newborn registration form includes:
-
-- Patient information.
-- Birth date and time.
-- Weight.
-- Gestational age.
-- Gender.
-- NICU admission status.
-- Parent or guardian contact information.
-
-The form uses:
-
-- `preventDefault()` to avoid page reload.
-- Typed DOM access.
-- Validation before saving.
-- Error feedback messages.
-- Asynchronous saving process.
-
----
-
-# Implemented Validations
-
-The application validates:
-
-- ID must be greater than zero.
-- Name is required.
-- Name cannot contain only numbers.
-- Birth date is required.
-- Birth date cannot be in the future.
-- Weight must be between 0.5 and 8 kg.
-- Gestational age must be between 22 and 45 weeks.
-- Contact name is required.
-- Email format validation.
-- Phone number validation.
-
-These validations represent basic business rules for neonatal registration.
-
----
-
-# 3. Asynchronous Architecture
-
-The application uses asynchronous programming to simulate communication with external services.
-
-## Implemented Techniques
-
-- `async / await`
-- `Promise.all()`
-- `try / catch`
-
----
-
-## Data Operations
-
-The application performs asynchronous operations for:
-
-- Loading newborn information.
-- Loading healthcare processes.
-- Loading assigned processes.
-- Saving new newborn registrations.
-
----
-
-## User Experience
-
-The application provides:
-
-- Loading messages while retrieving information.
-- Error messages when operations fail.
-- Automatic UI refresh after successful operations.
-
----
-
-# Application Workflow
-
-1. The application starts.
-2. Initial data is loaded asynchronously.
-3. Newborn information is displayed.
-4. Healthcare processes are displayed.
-5. Users can assign processes to the newborn.
-6. Users can complete or cancel assigned processes.
-7. Newborn registration can be performed through the validated form.
-8. Data is updated after successful operations.
-
----
-
-# Code Quality Practices
-
-The project applies the following practices:
-
-- Separation of concerns.
-- Modular component design.
-- Reusable functions.
-- Clear responsibility between layers.
-- Strong TypeScript typing.
-- No usage of `any`.
-- Safe DOM manipulation.
-- Validation separated from UI logic.
-- Error handling with `try/catch`.
-- Clean asynchronous flow.
-
----
-
-# Learning Outcomes
-
-This project demonstrates practical application of:
-
-- TypeScript Interfaces.
-- TypeScript Enums.
-- Strict typing.
-- DOM type guards.
-- Event handling.
-- Form processing.
-- Business validation rules.
-- Async/Await programming.
-- Promise-based operations.
-- Error handling.
-- Modular frontend architecture.
-
----
-
-# How to Run
-
-Clone the repository:
+## 1. Clone the repository
 
 ```bash
 git clone https://github.com/valehd/processcare-frontend.git
 ```
 
-Navigate to the project folder:
+Navigate to the project:
 
 ```bash
 cd processcare-frontend
 ```
 
-Install dependencies:
+---
+
+## 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-Start the development server:
+---
+
+## 3. Start the Backend
+
+The ProcessCare backend must be running before using the frontend.
+
+From the backend repository:
+
+```bash
+docker compose up -d
+```
+
+Then start the Spring Boot application using the Maven Wrapper:
+
+```bash
+./mvnw spring-boot:run
+```
+
+The backend will be available at:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## 4. Start the Frontend
+
+From the frontend repository:
 
 ```bash
 npm run dev
 ```
 
-Open the local URL provided by Vite.
+Vite will provide the local development URL, normally:
+
+```text
+http://localhost:5173
+```
 
 ---
 
-# Repository
+# Testing the Integration
 
-GitHub Repository:
+The frontend can be tested together with the backend by performing the following operations:
 
-https://github.com/valehd/processcare-frontend
+1. Open the frontend application.
+2. Verify that newborn information is loaded.
+3. Verify that assigned processes are displayed.
+4. Assign a healthcare process.
+5. Verify that the process appears with `PENDING` status.
+6. Complete a process.
+7. Verify that the status changes to `COMPLETED`.
+8. Cancel a pending process.
+9. Verify that the status changes to `CANCELLED`.
+10. Refresh the application and verify that the information is retrieved from the backend database.
+
+The backend API can also be verified independently using tools such as `curl` or Swagger UI.
 
 ---
 
+# Backend API Documentation
 
-![alt text](public/evidence.png)
+During development, the ProcessCare backend provides interactive API documentation through Swagger UI.
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+OpenAPI documentation:
+
+```text
+http://localhost:8080/api-docs
+```
+
+---
+
+# Security and Configuration
+
+Sensitive database credentials are not stored directly in the application source configuration.
+
+The frontend does not contain database credentials.
+
+Database credentials are handled by the backend environment configuration.
+
+Environment-specific configuration should not expose passwords, tokens, API keys, or other sensitive information in the Git repository.
+
+---
+
+# Hito 4 Objectives
+
+This frontend contributes to the Milestone 4 implementation by providing the presentation layer for the ProcessCare system.
+
+The complete system demonstrates:
+
+* Frontend and backend separation.
+* REST API integration.
+* TypeScript strong typing.
+* Modular frontend architecture.
+* Asynchronous communication.
+* PostgreSQL persistence.
+* Spring Boot backend.
+* Docker containerization.
+* Business rule enforcement in the backend.
+* Error handling.
+* Process state management.
+
+---
 
 # Author
 
 **Valentina Hernández**
 
-2026
+ProcessCare — 2026
+
+Frontend developed as part of a Java and TypeScript backend/frontend development project, integrating a TypeScript application with a Spring Boot REST microservice and PostgreSQL persistence.

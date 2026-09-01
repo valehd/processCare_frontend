@@ -6,13 +6,18 @@ const statusLabel: Record<ProcessStatus, string> = {
     [ProcessStatus.CANCELLED]: "Cancelled",
 };
 
-export function generateCatalogCardHtml(process: HealthcareProcess, isAssigned: boolean): string {
+export function generateCatalogCardHtml(
+    process: HealthcareProcess,
+    isAssigned: boolean
+): string {
+
     return `
     <div class="catalog-card ${isAssigned ? 'is-assigned' : ''}">
         <div class="catalog-info">
             <span class="catalog-index"></span>
             <span class="catalog-name">${process.name}</span>
         </div>
+
         <button
             class="btn btn-assign"
             data-process="${process.name}"
@@ -23,30 +28,47 @@ export function generateCatalogCardHtml(process: HealthcareProcess, isAssigned: 
     `;
 }
 
-export function generateAssignedCardHtml(assigned: AssignedProcess): string {
+
+export function generateAssignedCardHtml(
+    assigned: AssignedProcess
+): string {
+
     const label = statusLabel[assigned.status];
-    const isPending = assigned.status === ProcessStatus.PENDING;
+
+    const isPending =
+        assigned.status === ProcessStatus.PENDING;
 
     return `
     <div class="process-card status-${assigned.status}">
+
         <div class="card-header">
-            <h3>${assigned.process.name}</h3>
-            <span class="badge badge-${assigned.status}">${label}</span>
+
+            <h3>${assigned.processName}</h3>
+
+            <span class="badge badge-${assigned.status}">
+                ${label}
+            </span>
+
         </div>
+
         <div class="card-footer">
+
             <button
                 class="btn btn-complete"
-                data-process="${assigned.process.name}"
+                data-process="${assigned.processName}"
                 ${isPending ? '' : 'disabled'}>
                 Complete
             </button>
+
             <button
                 class="btn btn-cancel"
-                data-process="${assigned.process.name}"
+                data-process="${assigned.processName}"
                 ${isPending ? '' : 'disabled'}>
                 Cancel
             </button>
+
         </div>
+
     </div>
     `;
 }

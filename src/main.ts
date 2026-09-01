@@ -1,4 +1,4 @@
-import { type AssignedProcess, type HealthcareProcess, type Newborn, ProcessStatus } from './models/process';
+import { type AssignedProcess, type HealthcareProcess, type Newborn } from './models/process';
 import { generateCatalogCardHtml, generateAssignedCardHtml } from './components/ProcessCard';
 import {loadAssignedProcesses, loadHealthcareProcesses, loadNewborn} from './services/processService';
 import { generateNewbornFormHtml, bindNewbornForm } from './components/NewbornForm';
@@ -14,7 +14,9 @@ function render(): void {
     const appContainer = document.getElementById('app');
     if (!appContainer) return;
 
-    const assignedNames = new Set(assignedProcesses.map(a => a.process.name));
+    const assignedNames = new Set(
+        assignedProcesses.map(a => a.processName)
+    );
 
     const catalogHtml = healthcareProcesses
         .map(p => generateCatalogCardHtml(p, assignedNames.has(p.name)))
@@ -75,9 +77,6 @@ function showNewbornForm(): void {
 
 
 
-
-
-
 async function init(): Promise<void> {
 
     const appContainer = document.getElementById('app');
@@ -89,19 +88,24 @@ async function init(): Promise<void> {
 
     try {
 
-        [newborn, healthcareProcesses, assignedProcesses] =
-            await Promise.all([
-        loadNewborn(),
-        loadHealthcareProcesses(),
-        loadAssignedProcesses()
-    ]);
-        if (!newborn) {
-    showNewbornForm();
-        } else {        
-        render();
+        newborn = await loadNewborn();
 
-    } }
-    catch (error) {
+        healthcareProcesses = await loadHealthcareProcesses();
+
+        if (newborn) {
+            assignedProcesses =
+                await loadAssignedProcesses(newborn.id);
+        } else {
+            assignedProcesses = [];
+        }
+
+        if (!newborn) {
+            showNewbornForm();
+        } else {
+            render();
+        }
+
+    } catch (error) {
 
         console.error(error);
 
@@ -114,6 +118,9 @@ async function init(): Promise<void> {
         }
     }
 }
+
+
+
 
 init();
 

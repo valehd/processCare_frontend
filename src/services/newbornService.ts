@@ -1,5 +1,4 @@
-import type { Newborn } from "../models";
-
+import type { Newborn } from "../models/process";
 
 export async function saveNewborn(
     newborn: Newborn
@@ -14,5 +13,4 @@ export async function saveNewborn(
         }, 1000);
 
     });
-
 }

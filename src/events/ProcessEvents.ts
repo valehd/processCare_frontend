@@ -1,6 +1,10 @@
 import { ProcessStatus } from "../models";
 import type { AssignedProcess, Newborn } from "../models";
-
+import {
+    assignProcess,
+    completeProcess,
+    cancelProcess
+} from "../services/processService";
 
 export function bindProcessEvents(
     newborn: Newborn | null,
@@ -27,7 +31,6 @@ export function bindProcessEvents(
         assignedProcesses,
         render
     );
-
 }
 
 
@@ -38,18 +41,15 @@ function bindRegisterButton(
     const registerButton =
         document.getElementById("btn-register-newborn");
 
-
     if (!(registerButton instanceof HTMLButtonElement)) {
         return;
     }
 
     registerButton.addEventListener("click", () => {
-
         showNewbornForm();
-
     });
-
 }
+
 
 function bindAssignButtons(
     newborn: Newborn | null,
@@ -58,69 +58,63 @@ function bindAssignButtons(
     render: () => void
 ): void {
 
-
     document.querySelectorAll(".btn-assign")
         .forEach(btn => {
 
+            btn.addEventListener("click", async (event) => {
 
-        btn.addEventListener("click", (event) => {
+                if (!newborn) {
+                    showNewbornForm();
+                    return;
+                }
 
+                const button =
+                    event.currentTarget as HTMLButtonElement;
 
-            if (!newborn) {
+                const processName =
+                    button.dataset.process;
 
-                showNewbornForm();
+                if (!processName) {
+                    return;
+                }
 
-                return;
-            }
+                const alreadyAssigned =
+                    assignedProcesses.some(
+                        assigned =>
+                            assigned.processName === processName
+                    );
 
+                if (alreadyAssigned) {
+                    return;
+                }
 
-            const button =
-                event.currentTarget as HTMLButtonElement;
+                try {
 
+                    const assignedProcess =
+                        await assignProcess(
+                            newborn.id,
+                            processName
+                        );
 
-            const processName =
-                button.dataset.process;
+                    assignedProcesses.push(
+                        assignedProcess
+                    );
 
+                    render();
 
-            if (!processName) {
-                return;
-            }
+                } catch (error) {
 
+                    console.error(error);
 
-            const alreadyAssigned =
-                assignedProcesses.some(
-                    assigned =>
-                        assigned.process.name === processName
-                );
-
-
-            if (alreadyAssigned) {
-                return;
-            }
-
-
-            assignedProcesses.push({
-
-                newborn,
-
-                process: {
-                    name: processName
-                },
-
-                status: ProcessStatus.PENDING
-
+                    alert(
+                        error instanceof Error
+                            ? error.message
+                            : "Unable to assign process."
+                    );
+                }
             });
-
-
-            render();
-
         });
-
-
-    });
-
 }
-
 
 
 function bindCompleteButtons(
@@ -128,49 +122,59 @@ function bindCompleteButtons(
     render: () => void
 ): void {
 
-
     document.querySelectorAll(".btn-complete")
         .forEach(btn => {
 
+            btn.addEventListener("click", async (event) => {
 
-        btn.addEventListener("click", (event) => {
+                const button =
+                    event.currentTarget as HTMLButtonElement;
 
+                const processName =
+                    button.dataset.process;
 
-            const button =
-                event.currentTarget as HTMLButtonElement;
+                if (!processName) {
+                    return;
+                }
 
+                const assigned =
+                    assignedProcesses.find(
+                        process =>
+                            process.processName === processName
+                    );
 
-            const processName =
-                button.dataset.process;
+                if (
+                    !assigned ||
+                    assigned.status !== ProcessStatus.PENDING
+                ) {
+                    return;
+                }
 
+                try {
 
-            const assigned =
-                assignedProcesses.find(
-                    process =>
-                        process.process.name === processName
-                );
+                    const updatedProcess =
+                        await completeProcess(
+                            assigned.newbornId,
+                            processName
+                        );
 
+                    assigned.status =
+                        updatedProcess.status;
 
-            if (
-                assigned &&
-                assigned.status === ProcessStatus.PENDING
-            ) {
+                    render();
 
+                } catch (error) {
 
-                assigned.status =
-                    ProcessStatus.COMPLETED;
+                    console.error(error);
 
-
-                render();
-
-            }
-
-
+                    alert(
+                        error instanceof Error
+                            ? error.message
+                            : "Unable to complete process."
+                    );
+                }
+            });
         });
-
-
-    });
-
 }
 
 
@@ -180,47 +184,57 @@ function bindCancelButtons(
     render: () => void
 ): void {
 
-
     document.querySelectorAll(".btn-cancel")
         .forEach(btn => {
 
+            btn.addEventListener("click", async (event) => {
 
-        btn.addEventListener("click", (event) => {
+                const button =
+                    event.currentTarget as HTMLButtonElement;
 
+                const processName =
+                    button.dataset.process;
 
-            const button =
-                event.currentTarget as HTMLButtonElement;
+                if (!processName) {
+                    return;
+                }
 
+                const assigned =
+                    assignedProcesses.find(
+                        process =>
+                            process.processName === processName
+                    );
 
-            const processName =
-                button.dataset.process;
+                if (
+                    !assigned ||
+                    assigned.status !== ProcessStatus.PENDING
+                ) {
+                    return;
+                }
 
+                try {
 
-            const assigned =
-                assignedProcesses.find(
-                    process =>
-                        process.process.name === processName
-                );
+                    const updatedProcess =
+                        await cancelProcess(
+                            assigned.newbornId,
+                            processName
+                        );
 
+                    assigned.status =
+                        updatedProcess.status;
 
-            if (
-                assigned &&
-                assigned.status === ProcessStatus.PENDING
-            ) {
+                    render();
 
+                } catch (error) {
 
-                assigned.status =
-                    ProcessStatus.CANCELLED;
+                    console.error(error);
 
-
-                render();
-
-            }
-
-
+                    alert(
+                        error instanceof Error
+                            ? error.message
+                            : "Unable to cancel process."
+                    );
+                }
+            });
         });
-
-
-    });
-
 }

@@ -1,3 +1,4 @@
+
 export enum ProcessStatus {
     PENDING = "PENDING",
     COMPLETED = "COMPLETED",
@@ -15,14 +16,12 @@ export enum Relationship {
     GUARDIAN = "GUARDIAN"
 }
 
-
 export interface ParentContact {
     fullName: string;
     email: string;
     phone: string;
     relationship: Relationship;
 }
-
 
 export interface Newborn {
     id: number;
@@ -35,14 +34,14 @@ export interface Newborn {
     contacts: ParentContact[];
 }
 
-
 export interface HealthcareProcess {
     name: string;
 }
 
-
 export interface AssignedProcess {
-    newborn: Newborn;
-    process: HealthcareProcess;
+    newbornId: number;
+    newbornName: string;
+    processName: string;
     status: ProcessStatus;
 }
+

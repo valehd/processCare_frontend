@@ -1,3 +1,4 @@
+
 import type { Newborn } from "../models";
 
 export function generatePatientInfoHtml(
@@ -6,53 +7,59 @@ export function generatePatientInfoHtml(
 
     if (!newborn) {
         return `
-        <section class="patient-info">
-            <h2>Patient Information</h2>
-            <p>No newborn registered.</p>
-        </section>
-        `;
+<section class="patient-info">
+    <h2>Patient Information</h2>
+<p>No newborn registered.</p>
+</section>
+    `;
     }
 
+    const contacts = newborn.contacts ?? [];
+
     return `
-    <section class="patient-info">
+<section class="patient-info">
 
-        <h2>Patient Information</h2>
+    <h2>Patient Information</h2>
 
-        <p>
-            <strong>Name:</strong>
-            ${newborn.name}
-        </p>
+<p>
+<strong>Name:</strong>
+${newborn.name}
+</p>
 
-        <p>
-            <strong>Birth date:</strong>
-            ${newborn.birthDateTime}
-        </p>
+<p>
+<strong>Birth date:</strong>
+${newborn.birthDateTime ?? "Not available"}
+</p>
 
-        <p>
-            <strong>Weight:</strong>
-            ${newborn.weight} kg
-        </p>
+<p>
+<strong>Weight:</strong>
+${newborn.weight ?? "Not available"} kg
+</p>
 
-        <p>
-            <strong>Gestational age:</strong>
-            ${newborn.gestationalAge} weeks
-        </p>
+<p>
+<strong>Gestational age:</strong>
+${newborn.gestationalAge ?? "Not available"} weeks
+</p>
 
-        <p>
-            <strong>Gender:</strong>
-            ${newborn.gender}
-        </p>
+<p>
+<strong>Gender:</strong>
+${newborn.gender ?? "Not available"}
+</p>
 
-        <p>
-            <strong>NICU:</strong>
-            ${newborn.admittedToNICU ? "Yes" : "No"}
-        </p>
+<p>
+<strong>NICU:</strong>
+${
+    newborn.admittedToNICU !== undefined
+        ? newborn.admittedToNICU ? "Yes" : "No"
+        : "Not available"
+}
+</p>
 
-        <h3>Contacts</h3>
+<h3>Contacts</h3>
 
-        ${
-            newborn.contacts.length > 0
-                ? newborn.contacts.map(contact => `
+${
+    contacts.length > 0
+        ? contacts.map(contact => `
                     <div class="contact-card">
 
                         <p>
@@ -67,9 +74,9 @@ export function generatePatientInfoHtml(
 
                     </div>
                 `).join("")
-                : "<p>No contacts.</p>"
-        }
+        : "<p>No contacts available.</p>"
+}
 
-    </section>
+</section>
     `;
 }
