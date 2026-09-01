@@ -6,7 +6,7 @@ ProcessCare Frontend is a TypeScript-based web application for managing neonatal
 
 The frontend provides a user-friendly interface for healthcare staff to visualize newborn information, manage parent or guardian contacts, assign healthcare processes, and update the status of assigned processes.
 
-For **Milestone 4 (Hito 4)**, the frontend is integrated with the ProcessCare backend through a REST API, replacing the previous local/mock data approach with real backend communication.
+For **Milestone 4 (Hito 4)**, the frontend is integrated with the ProcessCare backend through a REST API, replacing the previous local/mock data approach with real backend communication and PostgreSQL persistence.
 
 ---
 
@@ -19,8 +19,8 @@ For **Milestone 4 (Hito 4)**, the frontend is integrated with the ProcessCare ba
 * Complete assigned healthcare processes.
 * Cancel assigned healthcare processes.
 * Display the current status of each process.
-* Handle API loading states.
-* Display error messages when API operations fail.
+* Display loading states during API operations.
+* Display meaningful error messages when API operations fail.
 * Refresh process information after successful operations.
 * Communicate asynchronously with the ProcessCare backend.
 
@@ -61,6 +61,9 @@ src/
 │   ├── newbornService.ts
 │   └── processService.ts
 │
+├── events/
+│   └── ProcessEvents.ts
+│
 ├── assets/
 │   └── styles.css
 │
@@ -94,6 +97,17 @@ Services handle operations such as:
 
 This separation keeps API communication independent from UI logic.
 
+### Events
+
+The event layer handles user interactions related to healthcare process actions.
+
+For example:
+
+* Assigning a process.
+* Completing a process.
+* Cancelling a process.
+* Refreshing process information after an operation.
+
 ### Models
 
 TypeScript interfaces and enums represent the application domain.
@@ -122,22 +136,23 @@ The frontend communicates with the ProcessCare backend through REST endpoints.
 The backend is implemented using:
 
 * Java 21
-* Spring Boot
+* Spring Boot 3.5.5
 * Spring Web
 * Spring Data JPA
-* PostgreSQL
-* Docker
+* PostgreSQL 16
+* Docker Compose
+* OpenAPI / Swagger
 
-The frontend and backend are maintained as separate projects/repositories.
+The frontend and backend are maintained as separate GitHub repositories.
 
 ```text
 ProcessCare
 │
-├── processCare_Hito4
-│   └── Spring Boot Backend
+├── processCare_frontend
+│   └── TypeScript + Vite Frontend
 │
-└── processcare-frontend
-    └── TypeScript Frontend
+└── ProcessCare_backend
+    └── Spring Boot REST Backend
 ```
 
 The frontend development server runs on:
@@ -151,6 +166,24 @@ The backend API runs on:
 ```text
 http://localhost:8080
 ```
+
+---
+
+# GitHub Repositories
+
+### Frontend
+
+```text
+https://github.com/valehd/processCare_frontend
+```
+
+### Backend
+
+```text
+https://github.com/valehd/ProcessCare_backend
+```
+
+The two repositories together form the complete ProcessCare application.
 
 ---
 
@@ -239,7 +272,7 @@ Example request:
 }
 ```
 
-The newly assigned process starts with:
+A newly assigned process starts with:
 
 ```text
 PENDING
@@ -263,13 +296,13 @@ COMPLETED
 
 The frontend provides an action to cancel a pending healthcare process.
 
-The operation is sent to the backend API, which changes the process status to:
+The operation is sent to the backend API, which applies the corresponding business rule and changes the process status to:
 
 ```text
 CANCELLED
 ```
 
-The resulting status can then be verified through:
+The resulting status can be verified through:
 
 ```http
 GET /api/v1/newborns/{newbornId}/processes
@@ -320,13 +353,16 @@ Implemented techniques include:
 * Fetch API
 * Asynchronous UI updates
 
-Example application flow:
+Application flow:
 
 ```text
 User Action
     │
     ▼
 Frontend Component
+    │
+    ▼
+Event Handler
     │
     ▼
 Service Layer
@@ -359,7 +395,8 @@ Examples include:
 * Invalid process name.
 * Process already assigned.
 * Invalid process state.
-* Server or network errors.
+* Server errors.
+* Network errors.
 
 The backend uses structured error responses containing information such as:
 
@@ -426,7 +463,7 @@ The backend allows requests from this origin for the API endpoints.
 # Project Structure
 
 ```text
-processcare-frontend/
+processCare_frontend/
 │
 ├── public/
 │   └── ...
@@ -441,6 +478,9 @@ processcare-frontend/
 │   │   ├── PatientInfo.ts
 │   │   ├── ProcessCard.ts
 │   │   └── ...
+│   │
+│   ├── events/
+│   │   └── ProcessEvents.ts
 │   │
 │   ├── models/
 │   │   ├── index.ts
@@ -461,53 +501,109 @@ processcare-frontend/
 
 ---
 
-# Running the Project
+# Running the Complete Application
+
+The ProcessCare system consists of two separate repositories:
+
+```text
+Frontend
+processCare_frontend
+        │
+        │ REST API
+        ▼
+Backend
+ProcessCare_backend
+        │
+        ▼
+PostgreSQL
+```
 
 ## Requirements
 
+Install the following software:
+
 * Node.js
 * npm
-* ProcessCare Backend
-* PostgreSQL through Docker
+* Java 21
+* Docker Desktop
 
 ---
 
-## 1. Clone the repository
+# 1. Clone the Backend
 
 ```bash
-git clone https://github.com/valehd/processcare-frontend.git
+git clone https://github.com/valehd/ProcessCare_backend.git
 ```
 
-Navigate to the project:
+Navigate to the backend:
 
 ```bash
-cd processcare-frontend
-```
-
----
-
-## 2. Install dependencies
-
-```bash
-npm install
+cd ProcessCare_backend
 ```
 
 ---
 
-## 3. Start the Backend
+# 2. Configure Backend Environment Variables
 
-The ProcessCare backend must be running before using the frontend.
+The backend does not store database passwords directly in the source code.
 
-From the backend repository:
+Create a `.env` file in the backend project root:
+
+```text
+DATABASE_PASSWORD=SecureDevPassword123
+POSTGRES_PASSWORD=SecureDevPassword123
+```
+
+The `.env` file is ignored by Git and must not be committed to the repository.
+
+---
+
+# 3. Start PostgreSQL
+
+From the backend project root:
 
 ```bash
 docker compose up -d
 ```
 
-Then start the Spring Boot application using the Maven Wrapper:
+Verify the database container:
 
 ```bash
-./mvnw spring-boot:run
+docker compose ps
+```
+
+The PostgreSQL service uses:
+
+```text
+Database: processcare_db
+User: dev_user
+Port: 5432
+```
+
+---
+
+# 4. Run Backend Tests
+
+Using the Maven Wrapper:
+
+```bash
+./mvnw clean test
+```
+
+A successful build should finish with:
+
+```text
+BUILD SUCCESS
+```
+
+---
+
+# 5. Start the Backend
+
+Using the development profile:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 The backend will be available at:
@@ -518,9 +614,59 @@ http://localhost:8080
 
 ---
 
-## 4. Start the Frontend
+# 6. Verify the Backend
 
-From the frontend repository:
+Example:
+
+```bash
+curl http://localhost:8080/api/v1/newborns/1
+```
+
+To retrieve assigned processes:
+
+```bash
+curl http://localhost:8080/api/v1/newborns/1/processes
+```
+
+During development, Swagger UI is available at:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+OpenAPI documentation:
+
+```text
+http://localhost:8080/api-docs
+```
+
+---
+
+# 7. Clone the Frontend
+
+Open another terminal and clone the frontend repository:
+
+```bash
+git clone https://github.com/valehd/processCare_frontend.git
+```
+
+Navigate to the project:
+
+```bash
+cd processCare_frontend
+```
+
+---
+
+# 8. Install Frontend Dependencies
+
+```bash
+npm install
+```
+
+---
+
+# 9. Start the Frontend
 
 ```bash
 npm run dev
@@ -532,24 +678,34 @@ Vite will provide the local development URL, normally:
 http://localhost:5173
 ```
 
+The frontend requires the backend to be running on:
+
+```text
+http://localhost:8080
+```
+
 ---
 
 # Testing the Integration
 
-The frontend can be tested together with the backend by performing the following operations:
+The complete application can be tested using the following workflow:
 
-1. Open the frontend application.
-2. Verify that newborn information is loaded.
-3. Verify that assigned processes are displayed.
-4. Assign a healthcare process.
-5. Verify that the process appears with `PENDING` status.
-6. Complete a process.
-7. Verify that the status changes to `COMPLETED`.
-8. Cancel a pending process.
-9. Verify that the status changes to `CANCELLED`.
-10. Refresh the application and verify that the information is retrieved from the backend database.
+1. Start PostgreSQL using Docker.
+2. Start the Spring Boot backend.
+3. Start the Vite frontend.
+4. Open the frontend application.
+5. Verify that newborn information is loaded.
+6. Verify that assigned healthcare processes are displayed.
+7. Assign a healthcare process.
+8. Verify that the new process appears with `PENDING` status.
+9. Complete a pending process.
+10. Verify that the status changes to `COMPLETED`.
+11. Cancel another pending process.
+12. Verify that the status changes to `CANCELLED`.
+13. Refresh the application.
+14. Verify that the process statuses are retrieved from the backend database.
 
-The backend API can also be verified independently using tools such as `curl` or Swagger UI.
+The backend API can also be verified independently using `curl` or Swagger UI.
 
 ---
 
@@ -571,19 +727,26 @@ http://localhost:8080/api-docs
 
 # Security and Configuration
 
-Sensitive database credentials are not stored directly in the application source configuration.
-
 The frontend does not contain database credentials.
 
 Database credentials are handled by the backend environment configuration.
 
-Environment-specific configuration should not expose passwords, tokens, API keys, or other sensitive information in the Git repository.
+Sensitive information such as:
+
+* Database passwords.
+* API keys.
+* Authentication tokens.
+* Secrets.
+
+must not be committed to GitHub.
+
+The `.env` file is excluded from version control through `.gitignore`.
 
 ---
 
 # Hito 4 Objectives
 
-This frontend contributes to the Milestone 4 implementation by providing the presentation layer for the ProcessCare system.
+The frontend contributes to the Milestone 4 implementation by providing the presentation layer for the ProcessCare system.
 
 The complete system demonstrates:
 
@@ -595,9 +758,12 @@ The complete system demonstrates:
 * PostgreSQL persistence.
 * Spring Boot backend.
 * Docker containerization.
+* Clean Architecture and DDD principles in the backend.
 * Business rule enforcement in the backend.
 * Error handling.
 * Process state management.
+* Automated backend testing.
+* OpenAPI and Swagger documentation.
 
 ---
 
@@ -607,4 +773,4 @@ The complete system demonstrates:
 
 ProcessCare — 2026
 
-Frontend developed as part of a Java and TypeScript backend/frontend development project, integrating a TypeScript application with a Spring Boot REST microservice and PostgreSQL persistence.
+Frontend developed as part of a Java and TypeScript development project, integrating a TypeScript application with a Spring Boot REST microservice and PostgreSQL persistence.
