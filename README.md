@@ -744,9 +744,9 @@ The `.env` file is excluded from version control through `.gitignore`.
 
 ---
 
-# Hito 4 Objectives
+# Objectives
 
-The frontend contributes to the Milestone 4 implementation by providing the presentation layer for the ProcessCare system.
+The frontend contributes to the implementation by providing the presentation layer for the ProcessCare system.
 
 The complete system demonstrates:
 
